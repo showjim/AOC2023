@@ -8,15 +8,16 @@ def find_gears(schematic):
     # Helper function to check if there's a number at a given position
     def get_number_at(lines, x, y):
         if 0 <= x < len(lines) and 0 <= y < len(lines[x]) and lines[x][y].isdigit():
-            number = lines[x][y]
+            # number = lines[x][y]
             left, right = y, y
             while left - 1 >= 0 and lines[x][left - 1].isdigit():
                 left -= 1
-            while right + 1 < len(lines[x]) and lines[x][right + 1].isdigit():
-                right += 1
-            number = ''.join(lines[x][left:right + 1])
+            # DO NOT RECORD number value, there are duplicate number in gear !!!!!! USW POSITION INSTEAD
+            # while right + 1 < len(lines[x]) and lines[x][right + 1].isdigit():
+            #     right += 1
+            # number = ''.join(lines[x][left:right + 1])
 
-            return number
+            return (x, left)
         return None
 
     # Check each position for a gear symbol
@@ -25,15 +26,23 @@ def find_gears(schematic):
             if is_gear_symbol(char):
                 # Check for part numbers around the gear
                 part_numbers = set()
-                for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1), (1, 1), (-1, 1), (1, -1), (-1, -1)]:
-                    part_number = get_number_at(lines, i + dx, j + dy)
-                    if part_number:
-                        part_numbers.add(int(part_number))
+                for dx, dy in [[-1, 0], [1, 0], [0, -1], [0, 1], [1, 1], [-1, 1], [1, -1], [-1, -1], [0, 0]]:
+                    part_number_pos = get_number_at(lines, i + dx, j + dy)
+                    if part_number_pos:
+                        part_numbers.add(part_number_pos)
                 # If exactly two part numbers are found, it's a valid gear
                 if len(part_numbers) == 2:
-                    part_numbers_list = list(part_numbers)
+                    part_numbers_list = []
+                    for x, y in part_numbers:
+                        right = y
+                        number = lines[x][right]
+                        while right + 1 < len(lines[x]) and lines[x][right + 1].isdigit():
+                            number += lines[x][right + 1]
+                            right += 1
+                        part_numbers_list.append(int(number))
                     gear_ratio = part_numbers_list[0] * part_numbers_list[1]
                     gears.append(gear_ratio)
+                    print(f"Line {i} gear {j}: {part_numbers_list[0]} and {part_numbers_list[1]}")
 
     return gears
 
