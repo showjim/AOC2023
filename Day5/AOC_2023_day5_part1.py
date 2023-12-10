@@ -1,3 +1,5 @@
+import re
+
 def parse_map(mapping_lines):
     mapping_dict = {}
     for line in mapping_lines:
@@ -11,16 +13,21 @@ def translate(number, mapping):
     return mapping.get(number, number)
 
 def full_translation(seed, maps):
+    translation_process = []
     for map in maps:
         seed = translate(seed, map)
-    return seed
+        translation_process.append(seed)
+    return translation_process
 
 def process_input(input_data):
     sections = input_data.strip().split('\n\n')
     seeds_section = sections[0]
     seeds = [int(seed) for seed in seeds_section.replace('seeds:', '').split()]
+    print(f"Parsed seeds: {seeds}")
 
     maps = [parse_map(section.split('\n')[1:]) for section in sections[1:]]
+
+    print(f"Parsed maps: \n{[list(m.items())[:5] for m in maps]}...") # Print a sample of each map
 
     return seeds, maps
 
@@ -28,11 +35,22 @@ def find_lowest_location_number(input_data):
     # Parse the input data
     seeds, maps = process_input(input_data)
 
-    # Translate each seed through the maps to find its location
-    location_numbers = [full_translation(seed, maps) for seed in seeds]
+    # For each seed, translate through the maps and track the process
+    translation_results = {}
+    for seed in seeds:
+        translation_process = full_translation(seed, maps)
+        translation_results[seed] = translation_process
+        print(f"Translation process for seed {seed}: {translation_process}")
 
-    # Find the lowest location number
-    return min(location_numbers)
+    # Find the lowest location number from the final translations
+    final_locations = [process[-1] for process in translation_results.values()]
+    lowest_location = min(final_locations)
+
+    # Display the full translation process for the seed that leads to the lowest location
+    lowest_seed = [seed for seed, locations in translation_results.items() if locations[-1] == lowest_location][0]
+    print(f"Full translation process for the seed that leads to the lowest location ({lowest_seed}): {translation_results[lowest_seed]}")
+
+    return lowest_location
 
 # Input data string
 input_data = """
@@ -251,6 +269,6 @@ humidity-to-location map:
 2961556571 3844101660 13480958
 """
 
-# Run the code to find the lowest location number
+# Run the code to find the lowest location number with the process printed out
 lowest_location_number = find_lowest_location_number(input_data)
 print("The lowest location number is:", lowest_location_number)
