@@ -35,7 +35,7 @@ def process_input(input_data):
     seeds = (i for start, length in zip(seeds_range, seeds_range) for i in range(start, start + length))
 
     # Create a generator of generators for the maps
-    maps = (parse_map(section.split('\n')[1:]) for section in sections[1:])
+    maps = [parse_map(section.split('\n')[1:]) for section in sections[1:]]
 
     return seeds, maps
 
@@ -51,7 +51,7 @@ def find_lowest_location_number(input_data):
 
     return lowest_location
 
-# Input data string (truncated for brevity)
+# Input data string
 input_data = """
 seeds: 79 14 55 13
 
